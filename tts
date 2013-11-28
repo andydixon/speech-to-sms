@@ -1,0 +1,15 @@
+#!/bin/bash
+
+username="**urlencoded email address - the at symbol replaced with %40**"
+password="**password**"
+
+echo "Recording (press Ctrl+C to stop)"
+arecord -D plughw:0,0 -q -f cd -t wav -d 0 -r 16000 | flac - -f --best --sample-rate 16000 -s -o /tmp/transcribe.flac;
+ 
+wget -q -U "Mozilla/5.0" --post-file /tmp/transcribe.flac --header "Content-Type: audio/x-flac; rate=16000" -O - "http://www.google.com/speech-api/v1/recognize?lang=en-us&client=chromium" | cut -d\" -f12  > /tmp/conversion.txt
+ 
+echo "You Said:"
+value=`cat /tmp/conversion.txt`
+echo "$value"
+to=$1
+curl --data-urlencode -v -d "username=${username}&password=${password}&sender=TTSCODE&numbers=${to}&message=${value}" http://api.txtlocal.com/send/
